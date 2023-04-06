@@ -1,5 +1,5 @@
 import { Typography, Paper, TextField, Button } from "@material-ui/core";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./article.css";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -16,6 +16,12 @@ const Article = () => {
   const userId = Cookies.get("userId");
   const userName = Cookies.get("userName");
 
+  const commentsRef = useRef(null);
+
+  const scrollToBottom = () => {
+    commentsRef?.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
   const handleAddComment = async (e) => {
     const latestComment = { comment: newComment };
     try {
@@ -27,6 +33,7 @@ const Article = () => {
         { userId, comment: newComment },
         { "Content-Type": "application/json" }
       );
+      scrollToBottom();
       showToast(res.data.message, "success");
     } catch (error) {
       showToast(error.message, "error");
@@ -71,14 +78,17 @@ const Article = () => {
             <Typography variant="h4" gutterBottom>
               Comments
             </Typography>
-            <ul className="comment-list">
-              {comments?.map((comment, index) => (
-                <li key={index} className="comment">
-                  <h4>{userName}</h4>
-                  <p>{comment?.comment}</p>
-                </li>
-              ))}
-            </ul>
+            <div className="comment-list" >
+              <ul >
+                {comments?.map((comment, index) => (
+                  <li key={index} className="comment">
+                    <h4>{userName}</h4>
+                    <p>{comment?.comment}</p>
+                  </li>
+                ))}
+              </ul>
+              <div ref={commentsRef}></div>
+            </div>
             <form onSubmit={handleAddComment}>
               <TextField
                 variant="outlined"

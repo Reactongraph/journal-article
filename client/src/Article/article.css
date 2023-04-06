@@ -21,6 +21,8 @@
   max-height: 500px;
   overflow-y: auto;
   margin-top: 16px;
+}
+.comment-list ul{
   padding: 0;
 }
 .comment-text {
