@@ -6,8 +6,8 @@ import Cookies from "js-cookie";
 import Navbar from "../navbar/navbar";
 import { showToast } from "../utils/notification";
 
-const apiUrl = process.env.REACT_APP_BACKEND_URL;
-const journalId = process.env.REACT_APP_JOURNAL_ID;
+const apiUrl = `${process.env.REACT_APP_BACKEND_URL}`;
+const journalId = `${process.env.REACT_APP_JOURNAL_ID}`;
 
 const Article = () => {
   const [comments, setComments] = useState([]);

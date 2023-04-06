@@ -14,7 +14,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { showToast } from "../utils/notification";
 import { signUpValidationSchema } from "../utils/validationSchema";
 
-const apiUrl = process.env.REACT_APP_BACKEND_URL;
+const apiUrl = `${process.env.REACT_APP_BACKEND_URL}`;
 
 const SignupForm = () => {
   const navigate = useNavigate();

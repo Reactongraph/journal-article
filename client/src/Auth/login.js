@@ -15,7 +15,7 @@ import { showToast } from "../utils/notification";
 import { loginValidationSchema } from "../utils/validationSchema";
 import { formatThrowError } from "../utils/helper";
 
-const apiUrl = process.env.REACT_APP_BACKEND_URL;
+const apiUrl = `${process.env.REACT_APP_BACKEND_URL}`;
 
 const LoginForm = () => {
   const navigate = useNavigate();
