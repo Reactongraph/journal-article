@@ -1,3 +1,7 @@
+
+import { React, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   TextField,
@@ -5,9 +9,6 @@ import {
   Grid,
   Typography,
 } from "@material-ui/core";
-import { React, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -27,6 +28,8 @@ const LoginForm = () => {
     resolver: yupResolver(loginValidationSchema),
   });
 
+  const [isSubmitDisabled, setSubmitDisabled] = useState(false);
+
   useEffect(() => {
     const userId = Cookies.get("userId");
     if (userId) {
@@ -35,6 +38,7 @@ const LoginForm = () => {
   }, [navigate]);
 
   const onSubmit = async (formData) => {
+    setSubmitDisabled(true);
     try {
       const { status, data } = await axios.post(
         `${apiUrl}/auth/login`,
@@ -51,7 +55,8 @@ const LoginForm = () => {
         navigate("/article");
       }
     } catch (error) {
-      showToast('Something went wrong, Please try again', "error");
+      setSubmitDisabled(false);
+      showToast(error.response.data.error, "error");
     }
   };
 
@@ -84,8 +89,8 @@ const LoginForm = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <Button type="submit" variant="contained" color="primary" size="large" fullWidth >
-              Login
+            <Button type="submit" variant="contained" color="primary" size="large" fullWidth disabled={isSubmitDisabled}>
+              {isSubmitDisabled ? 'Logging in...' : 'Login'}
             </Button>
           </Grid>
           <Grid item xs={12}>

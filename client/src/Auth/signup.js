@@ -1,3 +1,6 @@
+import { React, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import {
   Container,
   TextField,
@@ -5,9 +8,6 @@ import {
   Grid,
   Typography,
 } from "@material-ui/core";
-import { React, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -25,13 +25,18 @@ const SignupForm = () => {
   } = useForm({
     resolver: yupResolver(signUpValidationSchema),
   });
+
+  const [isSubmitDisabled, setSubmitDisabled] = useState(false);
+
   useEffect(() => {
     const userId = Cookies.get("userId");
     if (userId) {
       navigate("/article");
     }
   }, []);
+
   const onSubmit = async (data) => {
+    setSubmitDisabled(true);
     try {
       const res = await axios.post(
         `${apiUrl}/auth/signup`,
@@ -45,7 +50,8 @@ const SignupForm = () => {
         showToast(res.data.message, "success");
       }
     } catch (error) {
-      showToast("Something went wrong, Please try again", "error");
+      setSubmitDisabled(false);
+      showToast(error.response.data.error, "error");
     }
   };
 
@@ -96,8 +102,8 @@ const SignupForm = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <Button type="submit" variant="contained" color="primary" size="large" fullWidth>
-              Sign up
+            <Button type="submit" variant="contained" color="primary" size="large" fullWidth disabled={isSubmitDisabled}>
+              {isSubmitDisabled ? 'Sign up in progress...' : 'Sign up'}
             </Button>
           </Grid>
           <Grid item xs={12}>
