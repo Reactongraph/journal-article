@@ -60,4 +60,52 @@ const signUp = async (req, res) => {
   }
 };
 
-module.exports = { login, signUp };
+const googleLogin = async (req, res) => {
+  const { email, name } = req.body;
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      if (existingUser.socialLogin) {
+        const jwtOptions = {
+          expiresIn: "1h",
+        };
+        const token = jwt.sign(
+          { userId: existingUser._id },
+          "secretKey",
+          jwtOptions
+        );
+        return res.send({
+          message: "Login successful",
+          token,
+          data: existingUser,
+        });
+      } else {
+        return res.status(409).send({ error: "Email already in use" });
+      }
+    }
+    const [firstName, ...lastName] = name.split(" ");
+    // Create a new user
+    const newUser = {
+      email,
+      firstName,
+      lastName: lastName.join(" "),
+      socialLogin: true,
+    };
+    // Save the user to the database and retrieve the created user
+    const user = await User.create(newUser);
+    const jwtOptions = {
+      expiresIn: "1h",
+    };
+    const token = jwt.sign({ userId: user._id }, "secretKey", jwtOptions);
+    return res.send({
+      message: "Login successful",
+      token,
+      data: user,
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .send({ error: "Failed to register user", details: err });
+  }
+};
+module.exports = { login, signUp, googleLogin };

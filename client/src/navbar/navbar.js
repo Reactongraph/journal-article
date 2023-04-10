@@ -6,6 +6,7 @@ import { showToast } from "../utils/notification";
 function Navbar(props) {
   const navigate = useNavigate();
   const name = props.name;
+
   const logout = () => {
     Cookies.remove("token");
     Cookies.remove("userId");
@@ -13,6 +14,7 @@ function Navbar(props) {
     showToast("You have been logged out Successfully", "success");
     navigate("/");
   };
+  
   return (
     <AppBar style={{ borderRadius: "5px" }} position="static">
       <Toolbar sx={{ justifyContent: "space-between" }}>

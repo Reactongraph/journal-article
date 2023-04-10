@@ -38,10 +38,13 @@ const userSchema = new mongoose.Schema({
       }
     },
   },
+  socialLogin: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // Create user model
 const User = mongoose.model("User", userSchema);
-
 
 module.exports = User;
