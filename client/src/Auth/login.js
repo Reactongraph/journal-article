@@ -1,4 +1,3 @@
-
 import { React, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +14,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { showToast } from "../utils/notification";
 import { loginValidationSchema } from "../utils/validationSchema";
 import { formatThrowError } from "../utils/helper";
+import { GoogleLogin } from "@react-oauth/google";
+import jwtDecode from "jwt-decode";
 
 const apiUrl = `${process.env.REACT_APP_BACKEND_URL}`;
 
@@ -28,6 +29,32 @@ const LoginForm = () => {
     resolver: yupResolver(loginValidationSchema),
   });
 
+  const handleGoogleCallBackResponse = async (response) => {
+    const user_object = jwtDecode(response.credential);
+    const googleLoginData = {
+      name: user_object?.name,
+      email: user_object?.email,
+    };
+    try {
+      const { status, data } = await axios.post(
+        `${apiUrl}/auth/googleLogin`,
+        googleLoginData
+      );
+      if (status >= 400) {
+        formatThrowError(data?.message);
+        showToast("Something went wrong, Please try again", "error");
+      } else if (status >= 200 && status <= 204) {
+        Cookies.set("token", data.token);
+        Cookies.set("userName", data.data.firstName);
+        Cookies.set("userId", data.data._id);
+        showToast(data.message, "success");
+        navigate("/article");
+      }
+    } catch (error) {
+      setSubmitDisabled(false);
+      showToast(error.response.data.error, "error");
+    }
+  };
   const [isSubmitDisabled, setSubmitDisabled] = useState(false);
 
   useEffect(() => {
@@ -89,8 +116,15 @@ const LoginForm = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <Button type="submit" variant="contained" color="primary" size="large" fullWidth disabled={isSubmitDisabled}>
-              {isSubmitDisabled ? 'Logging in...' : 'Login'}
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              size="large"
+              fullWidth
+              disabled={isSubmitDisabled}
+            >
+              {isSubmitDisabled ? "Logging in..." : "Login"}
             </Button>
           </Grid>
           <Grid item xs={12}>
@@ -100,6 +134,14 @@ const LoginForm = () => {
           </Grid>
         </Grid>
       </form>
+      <GoogleLogin
+        onSuccess={(credentialResponse) => {
+          handleGoogleCallBackResponse(credentialResponse);
+        }}
+        onError={() => {
+          showToast("Login Failed", "error");
+        }}
+      />
     </Container>
   );
 };
