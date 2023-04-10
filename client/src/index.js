@@ -6,7 +6,7 @@ import { ToastContainer } from "react-toastify";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-const Id = `${process.env.GOOGLE_LOGIN_CLIENT_ID}`;
+const Id = `${process.env.REACT_APP_GOOGLE_LOGIN_CLIENT_ID}`;
 root.render(
   <React.StrictMode>
     <GoogleOAuthProvider clientId={Id}>

@@ -7,6 +7,7 @@ import {
   Button,
   Grid,
   Typography,
+  Box,
 } from "@material-ui/core";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -29,6 +30,19 @@ const LoginForm = () => {
     resolver: yupResolver(loginValidationSchema),
   });
 
+  useEffect(() => {
+    const userId = Cookies.get("userId");
+    if (userId) {
+      navigate("/article");
+    }
+  }, [navigate]);
+
+  const setCookies = (data) => {
+    Cookies.set("token", data.token);
+    Cookies.set("userName", data.data.firstName);
+    Cookies.set("userId", data.data._id);
+  }
+
   const handleGoogleCallBackResponse = async (response) => {
     const user_object = jwtDecode(response.credential);
     const googleLoginData = {
@@ -44,9 +58,7 @@ const LoginForm = () => {
         formatThrowError(data?.message);
         showToast("Something went wrong, Please try again", "error");
       } else if (status >= 200 && status <= 204) {
-        Cookies.set("token", data.token);
-        Cookies.set("userName", data.data.firstName);
-        Cookies.set("userId", data.data._id);
+        setCookies(data);
         showToast(data.message, "success");
         navigate("/article");
       }
@@ -55,14 +67,8 @@ const LoginForm = () => {
       showToast(error.response.data.error, "error");
     }
   };
-  const [isSubmitDisabled, setSubmitDisabled] = useState(false);
 
-  useEffect(() => {
-    const userId = Cookies.get("userId");
-    if (userId) {
-      navigate("/article");
-    }
-  }, [navigate]);
+  const [isSubmitDisabled, setSubmitDisabled] = useState(false);
 
   const onSubmit = async (formData) => {
     setSubmitDisabled(true);
@@ -75,9 +81,7 @@ const LoginForm = () => {
         formatThrowError(data?.message);
         showToast("Something went wrong, Please try again", "error");
       } else if (status >= 200 && status <= 204) {
-        Cookies.set("token", data.token);
-        Cookies.set("userName", data.data.firstName);
-        Cookies.set("userId", data.data._id);
+        setCookies(data);
         showToast(data.message, "success");
         navigate("/article");
       }
@@ -134,14 +138,16 @@ const LoginForm = () => {
           </Grid>
         </Grid>
       </form>
-      <GoogleLogin
-        onSuccess={(credentialResponse) => {
-          handleGoogleCallBackResponse(credentialResponse);
-        }}
-        onError={() => {
-          showToast("Login Failed", "error");
-        }}
-      />
+      <Box className="google-login" style={{ maxWidth:'240px', margin:'20px auto' }} textAlign={'center'}>
+        <GoogleLogin 
+          onSuccess={(credentialResponse) => {
+            handleGoogleCallBackResponse(credentialResponse);
+          }}
+          onError={() => {
+            showToast("Login Failed", "error");
+          }}
+        />
+      </Box>
     </Container>
   );
 };
