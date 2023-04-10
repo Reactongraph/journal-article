@@ -66,9 +66,14 @@ const googleLogin = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       if (existingUser.socialLogin) {
-        const token = jwt.sign({ userId: existingUser._id }, "secretKey", {
+        const jwtOptions = {
           expiresIn: "1h",
-        });
+        };
+        const token = jwt.sign(
+          { userId: existingUser._id },
+          "secretKey",
+          jwtOptions
+        );
         return res.send({
           message: "Login successful",
           token,
@@ -78,33 +83,29 @@ const googleLogin = async (req, res) => {
         return res.status(409).send({ error: "Email already in use" });
       }
     }
-    const userName = name.split(" ");
-    let fName;
-    let lName;
-    if (userName.length === 1) {
-      fName = userName[0];
-      lName = "";
-    } else {
-      (lName = userName.pop()), (fName = userName.join(" "));
-    }
+    const [firstName, ...lastName] = name.split(" ");
     // Create a new user
     const newUser = {
       email,
-      firstName: fName,
-      lastName: lName,
+      firstName,
+      lastName: lastName.join(" "),
       socialLogin: true,
     };
-    // Save the user to the database
-    await User.create(newUser);
-    const user = await User.findOne({ email });
-    const token = jwt.sign({ userId: user._id }, "secretKey", {
+    // Save the user to the database and retrieve the created user
+    const user = await User.create(newUser);
+    const jwtOptions = {
       expiresIn: "1h",
+    };
+    const token = jwt.sign({ userId: user._id }, "secretKey", jwtOptions);
+    return res.send({
+      message: "Login successful",
+      token,
+      data: user,
     });
-
-    res.send({ message: "Login successful", token, data: user });
   } catch (err) {
-    res.status(500).send({ error: "Failed to register user", details: err });
+    return res
+      .status(500)
+      .send({ error: "Failed to register user", details: err });
   }
 };
-
 module.exports = { login, signUp, googleLogin };
