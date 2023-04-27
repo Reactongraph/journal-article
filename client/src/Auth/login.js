@@ -12,11 +12,11 @@ import {
 import axios from "axios";
 import Cookies from "js-cookie";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { showToast } from "../utils/notification";
 import { loginValidationSchema } from "../utils/validationSchema";
 import { formatThrowError } from "../utils/helper";
 import { GoogleLogin } from "@react-oauth/google";
 import jwtDecode from "jwt-decode";
+import "../Article/article.css";
 
 const apiUrl = `${process.env.REACT_APP_BACKEND_URL}`;
 
@@ -41,7 +41,7 @@ const LoginForm = () => {
     Cookies.set("token", data.token);
     Cookies.set("userName", data.data.firstName);
     Cookies.set("userId", data.data._id);
-  }
+  };
 
   const handleGoogleCallBackResponse = async (response) => {
     const user_object = jwtDecode(response.credential);
@@ -56,19 +56,19 @@ const LoginForm = () => {
       );
       if (status >= 400) {
         formatThrowError(data?.message);
-        showToast("Something went wrong, Please try again", "error");
+        setError("Something went wrong, Please try again");
       } else if (status >= 200 && status <= 204) {
         setCookies(data);
-        showToast(data.message, "success");
         navigate("/article");
       }
     } catch (error) {
       setSubmitDisabled(false);
-      showToast(error.response.data.error, "error");
+      setError(error.response.data.error);
     }
   };
 
   const [isSubmitDisabled, setSubmitDisabled] = useState(false);
+  const [error, setError] = useState();
 
   const onSubmit = async (formData) => {
     setSubmitDisabled(true);
@@ -79,18 +79,16 @@ const LoginForm = () => {
       );
       if (status >= 400) {
         formatThrowError(data?.message);
-        showToast("Something went wrong, Please try again", "error");
+        setError("Something went wrong, Please try again");
       } else if (status >= 200 && status <= 204) {
         setCookies(data);
-        showToast(data.message, "success");
         navigate("/article");
       }
     } catch (error) {
       setSubmitDisabled(false);
-      showToast(error.response.data.error, "error");
+      setError(error.response.data.error);
     }
   };
-
   return (
     <Container maxWidth="xs" style={{ marginTop: "50px" }}>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -131,6 +129,7 @@ const LoginForm = () => {
               {isSubmitDisabled ? "Logging in..." : "Login"}
             </Button>
           </Grid>
+          {<span className="error">{error}</span>}
           <Grid item xs={12}>
             <Typography align="center" variant="body2">
               Don't have an account? <a href="/signup">Sign up</a>
@@ -138,13 +137,17 @@ const LoginForm = () => {
           </Grid>
         </Grid>
       </form>
-      <Box className="google-login" style={{ maxWidth:'240px', margin:'20px auto' }} textAlign={'center'}>
-        <GoogleLogin 
+      <Box
+        className="google-login"
+        style={{ maxWidth: "240px", margin: "20px auto" }}
+        textAlign={"center"}
+      >
+        <GoogleLogin
           onSuccess={(credentialResponse) => {
             handleGoogleCallBackResponse(credentialResponse);
           }}
           onError={() => {
-            showToast("Login Failed", "error");
+            setError("Login Failed");
           }}
         />
       </Box>

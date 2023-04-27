@@ -8,8 +8,8 @@ const articleSchema = new mongoose.Schema({
   description: {
     type: String,
   },
-  journalId:{
-    type: String
+  journalId: {
+    type: String,
   },
   comments: [
     {

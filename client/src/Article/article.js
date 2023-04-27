@@ -19,44 +19,58 @@ const Article = () => {
   const commentsRef = useRef(null);
 
   const scrollToBottom = () => {
-    commentsRef?.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+    commentsRef?.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const handleAddComment = async (e) => {
     const latestComment = { comment: newComment };
     try {
       e.preventDefault();
-      setComments([...comments, latestComment]);
       setNewComment("");
       const res = await axios.patch(
         `${apiUrl}/article/addComment/${journalId}`,
         { userId, comment: newComment },
         { "Content-Type": "application/json" }
       );
+      fetchComments();
+      setComments(res.data.data.comments);
       scrollToBottom();
-      showToast(res.data.message, "success");
     } catch (error) {
       showToast(error.message, "error");
     }
   };
+  const convertDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = ("0" + (date.getMonth() + 1)).slice(-2);
+    const day = ("0" + date.getDate()).slice(-2);
+    const hours = ("0" + date.getHours()).slice(-2);
+    const minutes = ("0" + date.getMinutes()).slice(-2);
+    const seconds = ("0" + date.getSeconds()).slice(-2);
+    const formattedDate = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+    return formattedDate;
+  };
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
 
+  const fetchComments = async () => {
+    try {
+      const res = await axios.get(
+        `${apiUrl}/article/getArticle/${journalId}/${userId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setArticle(res?.data?.article);
+      setComments(res?.data?.article?.comments || []);
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  };
   useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        const res = await axios.get(
-          `${apiUrl}/article/getArticle/${journalId}/${userId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        setArticle(res?.data?.article);
-        setComments(res?.data?.article?.comments || []);
-      } catch (error) {
-        showToast(error.message, "error");
-      }
-    };
     fetchComments();
   }, [userId]);
 
@@ -71,38 +85,106 @@ const Article = () => {
           <Typography variant="h3" gutterBottom>
             {article?.title}
           </Typography>
-          <Typography variant="body1" gutterBottom>
+          <Typography
+            variant="body1"
+            gutterBottom
+            style={{
+              fontFamily: "Montserrat, sans-serif",
+              fontWeight: 500,
+              fontSize: "1.2rem",
+              color: "#333",
+              letterSpacing: "0.05rem",
+              lineHeight: 1.5,
+              textAlign: "justify",
+              hyphens: "auto",
+            }}
+          >
             {article?.description}
           </Typography>
           <div className="comments" style={{ marginTop: "40px" }}>
             <Typography variant="h4" gutterBottom>
               Comments
             </Typography>
-            <div className="comment-list" >
-              <ul >
+            <div className="comment-list">
+              <ul>
                 {comments?.map((comment, index) => (
-                  <li key={index} className="comment">
-                    <h4>{userName}</h4>
-                    <p>{comment?.comment}</p>
-                  </li>
+                  <>
+                    <li key={index} className="comment">
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            flexWrap: "nowrap",
+                          }}
+                        >
+                          <div className="profileImage">
+                            {comment?.userId?.firstName[0].toUpperCase()}
+                            {comment?.userId?.lastName[0].toUpperCase()}
+                          </div>
+                          <h4>
+                            {comment?.userId?.firstName
+                              ? capitalizeFirstLetter(
+                                  comment?.userId?.firstName
+                                )
+                              : ""}{" "}
+                            {comment?.userId?.lastName
+                              ? capitalizeFirstLetter(comment?.userId?.lastName)
+                              : ""}
+                          </h4>
+                        </div>
+                        <p
+                          style={{
+                            fontWeight: 500,
+                            fontSize: "1.2rem",
+                            color: "#333",
+                          }}
+                        >
+                          {comment?.commentedDate
+                            ? convertDate(comment?.commentedDate)
+                            : ""}
+                        </p>
+                      </div>
+                      <p
+                        style={{
+                          fontFamily: "Montserrat, sans-serif",
+                          fontWeight: 500,
+                          fontSize: "1rem",
+                          color: "#333",
+                          letterSpacing: "0.05rem",
+                          lineHeight: 1.5,
+                          textAlign: "justify",
+                          hyphens: "auto",
+                        }}
+                      >
+                        {comment?.comment}
+                      </p>
+                    </li>
+                  </>
                 ))}
               </ul>
               <div ref={commentsRef}></div>
             </div>
-            <form onSubmit={handleAddComment}>
+            <form style={{ display: "flex" }} onSubmit={handleAddComment}>
               <TextField
                 variant="outlined"
-                margin="normal"
                 fullWidth
                 label="Add a comment"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
               />
               <Button
+                style={{ textTransform: "none" }}
                 type="submit"
                 variant="contained"
                 color="primary"
                 disabled={!newComment}
+                size="small"
               >
                 Add Comment
               </Button>

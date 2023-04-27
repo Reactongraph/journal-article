@@ -11,8 +11,8 @@ import {
 import axios from "axios";
 import Cookies from "js-cookie";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { showToast } from "../utils/notification";
 import { signUpValidationSchema } from "../utils/validationSchema";
+import "../Article/article.css";
 
 const apiUrl = `${process.env.REACT_APP_BACKEND_URL}`;
 
@@ -27,6 +27,7 @@ const SignupForm = () => {
   });
 
   const [isSubmitDisabled, setSubmitDisabled] = useState(false);
+  const [error, setError] = useState();
 
   useEffect(() => {
     const userId = Cookies.get("userId");
@@ -38,20 +39,15 @@ const SignupForm = () => {
   const onSubmit = async (data) => {
     setSubmitDisabled(true);
     try {
-      const res = await axios.post(
-        `${apiUrl}/auth/signup`,
-        data,
-        {
-          "Content-Type": "application/json",
-        }
-      );
+      const res = await axios.post(`${apiUrl}/auth/signup`, data, {
+        "Content-Type": "application/json",
+      });
       if (res.data) {
         navigate("/");
-        showToast(res.data.message, "success");
       }
     } catch (error) {
       setSubmitDisabled(false);
-      showToast(error.response.data.error, "error");
+      setError(error.response.data.error);
     }
   };
 
@@ -102,10 +98,18 @@ const SignupForm = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <Button type="submit" variant="contained" color="primary" size="large" fullWidth disabled={isSubmitDisabled}>
-              {isSubmitDisabled ? 'Sign up in progress...' : 'Sign up'}
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              size="large"
+              fullWidth
+              disabled={isSubmitDisabled}
+            >
+              {isSubmitDisabled ? "Sign up in progress..." : "Sign up"}
             </Button>
           </Grid>
+          {<span className="error">{error}</span>}
           <Grid item xs={12}>
             <Typography align="center" variant="body2">
               Already have an account? <a href="/login">Login</a>

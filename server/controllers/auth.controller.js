@@ -11,6 +11,11 @@ const login = async (req, res) => {
     // Find the user by email
     const user = await User.findOne({ email });
 
+    if (user && user.socialLogin) {
+      return res.status(409).send({
+        error: "You are loggedIn with sso please try with google sign-in",
+      });
+    }
     // Check if user exists and password is correct
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).send({ error: "Invalid email or password" });
@@ -34,8 +39,8 @@ const signUp = async (req, res) => {
     return res.status(400).send({ error: "Email and password are required" });
   }
   try {
-    const existingUser = await User.find({ email });
-    if (existingUser.length > 0) {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
       return res.status(409).send({ error: "Email already in use" });
     }
 
@@ -53,7 +58,6 @@ const signUp = async (req, res) => {
 
     // Save the user to the database
     await User.create(newUser);
-
     res.send({ message: "User registered successfully" });
   } catch (err) {
     res.status(500).send({ error: "Failed to register user", details: err });
@@ -65,23 +69,19 @@ const googleLogin = async (req, res) => {
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      if (existingUser.socialLogin) {
-        const jwtOptions = {
-          expiresIn: "1h",
-        };
-        const token = jwt.sign(
-          { userId: existingUser._id },
-          "secretKey",
-          jwtOptions
-        );
-        return res.send({
-          message: "Login successful",
-          token,
-          data: existingUser,
-        });
-      } else {
-        return res.status(409).send({ error: "Email already in use" });
-      }
+      const jwtOptions = {
+        expiresIn: "1h",
+      };
+      const token = jwt.sign(
+        { userId: existingUser._id },
+        "secretKey",
+        jwtOptions
+      );
+      return res.send({
+        message: "Login successful",
+        token,
+        data: existingUser,
+      });
     }
     const [firstName, ...lastName] = name.split(" ");
     // Create a new user

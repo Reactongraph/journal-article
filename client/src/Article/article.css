@@ -3,11 +3,13 @@
 }
 .comment {
   background-color: #f2f2f2;
-  border-radius: 10px;
-  padding: 10px;
+  /* border-radius: 10px; */
+  padding: 10px 15px;
   margin-bottom: 10px;
   position: relative;
   list-style: none;
+  border-bottom: 1px solid #ccc;
+  text-align: justify;
 }
 .comment:before {
   content: "";
@@ -22,10 +24,30 @@
   overflow-y: auto;
   margin-top: 16px;
 }
-.comment-list ul{
+.comment-list ul {
   padding: 0;
 }
 .comment-text {
   margin: 0;
   padding: 0;
+}
+.profileImage {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #956df2;
+  font-size: 16px;
+  color: #fff;
+  text-align: center;
+  line-height: 40px;
+  margin-right: 10px;
+}
+h4 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+.error {
+  color: #b94a48;
+  margin-left: 10px;
 }
