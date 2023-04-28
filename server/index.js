@@ -9,7 +9,7 @@ const app = express();
 
 dotenv.config()
 const port = process.env.PORT || 3050;
-const MongoURL = process.env.MONGODB_URL;
+const MongoURL = process.env.mongodb_url;
 
 app.use(bp.json());
 app.use(bp.urlencoded({ extended: true }));

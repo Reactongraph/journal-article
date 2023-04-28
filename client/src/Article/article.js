@@ -19,7 +19,7 @@ const Article = () => {
   const commentsRef = useRef(null);
 
   const scrollToBottom = () => {
-    commentsRef?.current?.scrollIntoView({ behavior: "smooth" });
+    commentsRef?.current?.lastChild.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleAddComment = async (e) => {
@@ -34,7 +34,6 @@ const Article = () => {
       );
       fetchComments();
       setComments(res.data.data.comments);
-      scrollToBottom();
     } catch (error) {
       showToast(error.message, "error");
     }
@@ -73,6 +72,9 @@ const Article = () => {
   useEffect(() => {
     fetchComments();
   }, [userId]);
+  useEffect(() => {
+    if (commentsRef.current.lastChild) scrollToBottom();
+  }, [comments.length]);
 
   return (
     <body>
@@ -91,7 +93,7 @@ const Article = () => {
             style={{
               fontFamily: "Montserrat, sans-serif",
               fontWeight: 500,
-              fontSize: "1.2rem",
+              fontSize: "0.875rem",
               color: "#333",
               letterSpacing: "0.05rem",
               lineHeight: 1.5,
@@ -106,7 +108,7 @@ const Article = () => {
               Comments
             </Typography>
             <div className="comment-list">
-              <ul>
+              <ul ref={commentsRef}>
                 {comments?.map((comment, index) => (
                   <>
                     <li key={index} className="comment">
@@ -141,7 +143,7 @@ const Article = () => {
                         <p
                           style={{
                             fontWeight: 500,
-                            fontSize: "1.2rem",
+                            fontSize: "0.875rem",
                             color: "#333",
                           }}
                         >
@@ -154,7 +156,7 @@ const Article = () => {
                         style={{
                           fontFamily: "Montserrat, sans-serif",
                           fontWeight: 500,
-                          fontSize: "1rem",
+                          fontSize: "0.875rem",
                           color: "#333",
                           letterSpacing: "0.05rem",
                           lineHeight: 1.5,
@@ -168,7 +170,7 @@ const Article = () => {
                   </>
                 ))}
               </ul>
-              <div ref={commentsRef}></div>
+              <div></div>
             </div>
             <form style={{ display: "flex" }} onSubmit={handleAddComment}>
               <TextField

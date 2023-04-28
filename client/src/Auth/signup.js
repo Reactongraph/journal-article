@@ -14,6 +14,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { signUpValidationSchema } from "../utils/validationSchema";
 import "../Article/article.css";
 
+
 const apiUrl = `${process.env.REACT_APP_BACKEND_URL}`;
 
 const SignupForm = () => {
