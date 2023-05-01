@@ -8,6 +8,7 @@ import {
   Grid,
   Typography,
   Box,
+  Modal,
 } from "@material-ui/core";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -17,10 +18,13 @@ import { formatThrowError } from "../utils/helper";
 import { GoogleLogin } from "@react-oauth/google";
 import jwtDecode from "jwt-decode";
 import "../Article/article.css";
+import CloseIcon from "@mui/icons-material/Close";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const apiUrl = `${process.env.REACT_APP_BACKEND_URL}`;
 
-const LoginForm = () => {
+const LoginForm = (props) => {
+  const { onClose } = props;
   const navigate = useNavigate();
   const {
     register,
@@ -29,7 +33,7 @@ const LoginForm = () => {
   } = useForm({
     resolver: yupResolver(loginValidationSchema),
   });
-
+  const [loading, setloading] = useState(false);
   useEffect(() => {
     const userId = Cookies.get("userId");
     if (userId) {
@@ -50,6 +54,8 @@ const LoginForm = () => {
       email: user_object?.email,
     };
     try {
+      setloading(true);
+
       const { status, data } = await axios.post(
         `${apiUrl}/auth/googleLogin`,
         googleLoginData
@@ -64,6 +70,11 @@ const LoginForm = () => {
     } catch (error) {
       setSubmitDisabled(false);
       setError(error.response.data.error);
+    } finally {
+      setloading(false);
+      setTimeout(() => {
+        setloading(false);
+      }, 3000); // 3 seconds timeout for testing purposes
     }
   };
 
@@ -90,13 +101,31 @@ const LoginForm = () => {
     }
   };
   return (
-    <Container maxWidth="xs" style={{ marginTop: "50px" }}>
+    <Container
+      maxWidth="xs"
+      style={{ marginTop: "106px", background: "#FFFFFF", height: "450px" }}
+    >
       <form onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Typography variant="h4" align="center">
+            <Typography
+              variant="h4"
+              align="center"
+              style={{ marginTop: "10px", borderRadius: "10px" }}
+            >
               Login
             </Typography>
+            <Button
+              onClick={onClose}
+              style={{
+                top: "-50px",
+                right: 0,
+                left: "375px",
+                paddingRight: "20px",
+              }}
+            >
+              <CloseIcon />
+            </Button>
           </Grid>
           <Grid item xs={12}>
             <TextField
@@ -142,14 +171,20 @@ const LoginForm = () => {
         style={{ maxWidth: "240px", margin: "20px auto" }}
         textAlign={"center"}
       >
-        <GoogleLogin
-          onSuccess={(credentialResponse) => {
-            handleGoogleCallBackResponse(credentialResponse);
-          }}
-          onError={() => {
-            setError("Login Failed");
-          }}
-        />
+        {loading ? (
+          <Box style={{ display: "flex", justifyContent: "center" }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <GoogleLogin
+            onSuccess={(credentialResponse) => {
+              handleGoogleCallBackResponse(credentialResponse);
+            }}
+            onError={() => {
+              setError("Login Failed");
+            }}
+          />
+        )}
       </Box>
     </Container>
   );

@@ -1,15 +1,24 @@
-import { Typography, Paper, TextField, Button } from "@material-ui/core";
+import {
+  Typography,
+  Paper,
+  TextField,
+  Button,
+  Modal,
+  Box,
+} from "@material-ui/core";
 import React, { useState, useEffect, useRef } from "react";
 import "./article.css";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Navbar from "../navbar/navbar";
 import { showToast } from "../utils/notification";
+import LoginForm from "../Auth/login";
+import SignupForm from "../Auth/signup";
 
 const apiUrl = `${process.env.REACT_APP_BACKEND_URL}`;
 const journalId = `${process.env.REACT_APP_JOURNAL_ID}`;
 
-const Article = () => {
+const Article = (props) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [article, setArticle] = useState();
@@ -79,7 +88,11 @@ const Article = () => {
   return (
     <body>
       <>
-        <Navbar name={userName} />
+        <Navbar
+          name={userName}
+          onOpenLoginModal={props.handleOpenLoginModal}
+          handleOpenSignupModal={props.handleOpenSignupModal}
+        />
         <Paper
           className="article-card"
           style={{ padding: "10px", marginTop: "20px" }}
@@ -87,6 +100,26 @@ const Article = () => {
           <Typography variant="h3" gutterBottom>
             {article?.title}
           </Typography>
+          <Modal
+            open={props.loginModalOpen}
+            onClose={props.handleCloseLoginModal}
+            aria-labelledby="Login"
+            aria-describedby="Login"
+          >
+            <Box>
+              <LoginForm onClose={props.handleCloseLoginModal} />
+            </Box>
+          </Modal>
+          <Modal
+            open={props.signupModalOpen}
+            onClose={props.handleCloseSignupModal}
+            aria-labelledby="Signup"
+            aria-describedby="Signup"
+          >
+            <Box>
+              <SignupForm onClose={props.handleCloseSignupModal} />
+            </Box>
+          </Modal>
           <Typography
             variant="body1"
             gutterBottom
@@ -172,25 +205,27 @@ const Article = () => {
               </ul>
               <div></div>
             </div>
-            <form style={{ display: "flex" }} onSubmit={handleAddComment}>
-              <TextField
-                variant="outlined"
-                fullWidth
-                label="Add a comment"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-              />
-              <Button
-                style={{ textTransform: "none" }}
-                type="submit"
-                variant="contained"
-                color="primary"
-                disabled={!newComment}
-                size="small"
-              >
-                Add Comment
-              </Button>
-            </form>
+            {userName && (
+              <form style={{ display: "flex" }} onSubmit={handleAddComment}>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  label="Add a comment"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                />
+                <Button
+                  style={{ textTransform: "none" }}
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={!newComment}
+                  size="small"
+                >
+                  Add Comment
+                </Button>
+              </form>
+            )}
           </div>
         </Paper>
       </>
