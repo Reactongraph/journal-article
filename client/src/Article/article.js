@@ -26,9 +26,13 @@ const Article = (props) => {
   const userName = Cookies.get("userName");
 
   const commentsRef = useRef(null);
+  const articleRef = useRef(null);
 
   const scrollToBottom = () => {
     commentsRef?.current?.lastChild.scrollIntoView({ behavior: "smooth" });
+  };
+  const handleScrollToArticle = () => {
+    articleRef.current.lastChild.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleAddComment = async (e) => {
@@ -82,8 +86,11 @@ const Article = (props) => {
     fetchComments();
   }, [userId]);
   useEffect(() => {
+    handleScrollToArticle();
+  }, []);
+  useEffect(() => {
     if (commentsRef.current.lastChild) scrollToBottom();
-  }, [comments.length]);
+  }, [newComment]);
 
   return (
     <body>
@@ -97,9 +104,11 @@ const Article = (props) => {
           className="article-card"
           style={{ padding: "10px", marginTop: "20px" }}
         >
-          <Typography variant="h3" gutterBottom>
-            {article?.title}
-          </Typography>
+          <div className="articles" ref={articleRef}>
+            <Typography variant="h3" gutterBottom>
+              {article?.title}
+            </Typography>
+          </div>
           <Modal
             open={props.loginModalOpen}
             onClose={props.handleCloseLoginModal}
@@ -136,15 +145,36 @@ const Article = (props) => {
           >
             {article?.description}
           </Typography>
-          <div className="comments" style={{ marginTop: "40px" }}>
-            <Typography variant="h4" gutterBottom>
+          <div
+            className="comments"
+            style={{
+              marginTop: "40px",
+              border: "1px solid rgba(0, 0, 0, 0.175)",
+              borderRadius: "5px",
+              padding: "0 0 15px ",
+            }}
+          >
+            <Typography
+              variant="h4"
+              gutterBottom
+              style={{
+                padding: "10px",
+                borderBottom: "1px solid rgba(0, 0, 0, 0.175)",
+                paddingBottom: " 10px",
+                backgroundColor: "rgba(33, 36, 41, 0.03)",
+              }}
+            >
               Comments
             </Typography>
             <div className="comment-list">
-              <ul ref={commentsRef}>
+              <ul ref={commentsRef} style={{ padding: "0 10px" }}>
                 {comments?.map((comment, index) => (
                   <>
-                    <li key={index} className="comment">
+                    <li
+                      key={index}
+                      className="comment"
+                      style={{ backgroundColor: "#fff" }}
+                    >
                       <div
                         style={{
                           display: "flex",
@@ -195,6 +225,8 @@ const Article = (props) => {
                           lineHeight: 1.5,
                           textAlign: "justify",
                           hyphens: "auto",
+                          marginLeft: "50px",
+                          marginTop: "0",
                         }}
                       >
                         {comment?.comment}
@@ -206,7 +238,10 @@ const Article = (props) => {
               <div></div>
             </div>
             {userName && (
-              <form style={{ display: "flex" }} onSubmit={handleAddComment}>
+              <form
+                style={{ display: "flex", margin: "0 10px" }}
+                onSubmit={handleAddComment}
+              >
                 <TextField
                   variant="outlined"
                   fullWidth
@@ -215,7 +250,11 @@ const Article = (props) => {
                   onChange={(e) => setNewComment(e.target.value)}
                 />
                 <Button
-                  style={{ textTransform: "none" }}
+                  style={{
+                    textTransform: "none",
+                    margin: "0 10px",
+                    width: "15%",
+                  }}
                   type="submit"
                   variant="contained"
                   color="primary"
